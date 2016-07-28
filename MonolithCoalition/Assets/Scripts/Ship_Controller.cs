@@ -4,6 +4,9 @@ using System.Collections;
 public class Ship_Controller : MonoBehaviour {
 
 	[SerializeField]
+	float moveSensitivity = .5f;
+
+	[SerializeField]
 	private float smoothTime = 0.3f;
 
 	private float velocity = 0;
@@ -13,6 +16,13 @@ public class Ship_Controller : MonoBehaviour {
 
 	[SerializeField]
 	private Transform laserSpawnPoint;
+
+	[SerializeField]
+	private float laserRechargeRate = .5f;
+
+	float rechargerCounter = 0;
+
+	bool charged = true;
 
 	// Use this for initialization
 	void Start () {
@@ -35,13 +45,25 @@ public class Ship_Controller : MonoBehaviour {
 		float vertical = Input.GetAxis("Vertical");
 
 		var rb = GetComponent<Rigidbody2D>();
-		rb.AddForce(transform.rotation * (new Vector2(horizontal, vertical)), ForceMode2D.Impulse);
+		rb.AddForce(transform.rotation * (new Vector2(horizontal, vertical)* moveSensitivity), ForceMode2D.Impulse);
 
 		//GetComponent<Rigidbody2D>().AddForce(transform.rotation * Vector2.up * 1f);
 
-		if (Input.GetMouseButton(0))
+		if (Input.GetMouseButton(0) && charged)
 		{
+			charged = false;
 			GameObject gb = GameObject.Instantiate(lasetBullet, laserSpawnPoint.position, transform.rotation) as GameObject;
+		}
+
+		if(!charged)
+		{
+			rechargerCounter += Time.deltaTime;
+
+			if(rechargerCounter >= laserRechargeRate)
+			{
+				rechargerCounter = 0;
+				charged = true;
+			}
 		}
 	}
 }
